@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌍 Multi-Timezone Clock</title>
+    <style>
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body Styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+        }
+
+        /* Header with Hamburger Menu */
+        header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #2a2a2a;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        header h1 {
+            color: #ffffff;
+            font-size: 1.5em;
+        }
+
+        /* Hamburger Menu */
+        .hamburger {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .hamburger div {
+            width: 30px;
+            height: 4px;
+            background-color: #fff;
+            border-radius: 2px;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .hamburger:hover div {
+            background-color: #ff9800;
+        }
+
+        /* Product Card Grid */
+        .clock-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        /* Product Card Styling */
+        .product-card {
+            background: linear-gradient(145deg, #232323, #1c1c1c);
+            border-radius: 15px;
+            box-shadow: 6px 6px 12px #0f0f0f, -6px -6px 12px #2e2e2e;
+            padding: 20px;
+            text-align: center;
+            color: #ffffff;
+            position: relative;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 8px 8px 16px #0c0c0c, -8px -8px 16px #333333;
+        }
+
+        .product-card .city {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .product-card .time {
+            font-size: 1.8em;
+        }
+
+        .product-card .tooltip {
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #2a2a2a;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .product-card:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.2em;
+            }
+
+            .hamburger div {
+                width: 25px;
+                height: 3px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .product-card {
+                padding: 10px;
+            }
+
+            .product-card .time {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🌍 Multi-Timezone Clock</h1>
+        <div class="hamburger" aria-label="Toggle menu">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </header>
+
+    <div class="clock-grid" id="clockGrid">
+        <!-- JavaScript will dynamically generate the product cards here -->
+    </div>
+
+    <script>
+        // List of cities and their time zones
+        const cities = [
+            { name: "UTC", timezone: "UTC" },
+            { name: "New York", timezone: "America/New_York" },
+            { name: "London", timezone: "Europe/London" },
+            { name: "Tokyo", timezone: "Asia/Tokyo" },
+            { name: "Sydney", timezone: "Australia/Sydney" },
+            { name: "Dubai", timezone: "Asia/Dubai" },
+            { name: "Beijing", timezone: "Asia/Shanghai" },
+            { name: "Moscow", timezone: "Europe/Moscow" },
+            { name: "Cape Town", timezone: "Africa/Johannesburg" },
+            { name: "Mumbai", timezone: "Asia/Kolkata" },
+            { name: "Paris", timezone: "Europe/Paris" },
+            { name: "Berlin", timezone: "Europe/Berlin" },
+            { name: "Singapore", timezone: "Asia/Singapore" },
+            { name: "Los Angeles", timezone: "America/Los_Angeles" },
+            { name: "Chicago", timezone: "America/Chicago" },
+            { name: "Rio de Janeiro", timezone: "America/Sao_Paulo" },
+            { name: "Buenos Aires", timezone: "America/Argentina/Buenos_Aires" },
+            { name: "Seoul", timezone: "Asia/Seoul" },
+            { name: "Hong Kong", timezone: "Asia/Hong_Kong" },
+            { name: "Bangkok", timezone: "Asia/Bangkok" },
+            { name: "Toronto", timezone: "America/Toronto" },
+            { name: "Mexico City", timezone: "America/Mexico_City" },
+            { name: "Madrid", timezone: "Europe/Madrid" },
+            { name: "Rome", timezone: "Europe/Rome" },
+            { name: "Istanbul", timezone: "Europe/Istanbul" }
+        ];
+
+        // Function to format time
+        function formatTime(date) {
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}`;
+        }
+
+        // Function to update clocks
+        function updateClocks() {
+            const clockGrid = document.getElementById('clockGrid');
+            clockGrid.innerHTML = ''; // Clear previous clocks
+
+            cities.forEach(city => {
+                const now = new Date().toLocaleString("en-US", { timeZone: city.timezone });
+                const cityTime = new Date(now);
+
+                // Create product card
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <div class="city" aria-label="${city.name}">${city.name}</div>
+                    <div class="time">${formatTime(cityTime)}</div>
+                    <div class="tooltip" aria-label="Tooltip showing timezone">${city.timezone}</div>
+                `;
+
+                clockGrid.appendChild(card);
+            });
+        }
+
+        // Update clocks every second
+        setInterval(updateClocks, 1000);
+
+        // Initial clock update
+        updateClocks();
+    </script>
+</body>
+</html>
